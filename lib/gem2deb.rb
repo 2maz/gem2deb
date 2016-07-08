@@ -49,6 +49,8 @@ module Gem2Deb
 
   LIBDIR = File.expand_path(File.dirname(__FILE__))
 
+  DEFAULT_PREFIX = '/usr'
+
   def run(*argv)
     puts(_format_cmdline(argv)) if Gem2Deb.verbose
     system(*argv)
