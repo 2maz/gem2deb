@@ -26,7 +26,7 @@ module Gem2Deb
 
     #name             Ruby binary
     #---------------  -------------------
-    'ruby1.9.1' => '/usr/bin/ruby1.9.1',
+    #'ruby1.9.1' => '/usr/bin/ruby1.9.1',
     'ruby2.0'   => '/usr/bin/ruby2.0',
 
   }.select do |version, binary|
@@ -45,6 +45,8 @@ module Gem2Deb
   ]
 
   RUBY_SHEBANG_CALL = '/usr/bin/env ruby'
+
+  DEFAULT_PREFIX = '/usr'
 
   BIN_DIR = '/usr/bin'
 

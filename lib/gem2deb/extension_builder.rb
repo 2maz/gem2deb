@@ -56,7 +56,13 @@ module Gem2Deb
           exit(1)
         end
       begin
-        target = File.expand_path(File.join(destdir, RbConfig::CONFIG['vendorarchdir']))
+        config_dir = RbConfig::CONFIG['vendorarchdir']
+        dh_install_prefix = ENV['DH_RUBY_INSTALL_PREFIX'] || DEFAULT_PREFIX
+        if config_dir.start_with?(DEFAULT_PREFIX)
+          config_dir.sub! DEFAULT_PREFIX, dh_install_prefix
+        end
+
+        target = File.expand_path(File.join(destdir,config_dir))
         FileUtils.mkdir_p(File.dirname(target))
         Dir.chdir(directory) do
           rubygems_builder.build(extension, '.', target, results)

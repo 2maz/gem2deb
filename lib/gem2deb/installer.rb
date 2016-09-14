@@ -17,12 +17,23 @@ module Gem2Deb
     attr_reader :ruby_versions
     attr_accessor :verbose
     attr_accessor :dh_auto_install_destdir
+    attr_reader :dh_install_prefix
 
     def initialize(binary_package, root, ruby_versions = SUPPORTED_RUBY_VERSIONS.keys)
       @binary_package = binary_package
       @root = File.expand_path(root)
       @ruby_versions = ruby_versions
       @metadata = Gem2Deb::Metadata.new(@root)
+    end
+
+    def ensure_install_prefix(path)
+      dh_install_prefix = ENV['DH_RUBY_INSTALL_PREFIX'] || DEFAULT_PREFIX
+      puts "dh_install_prefix: #{dh_install_prefix}"
+      if path.start_with?(DEFAULT_PREFIX)
+        path.sub DEFAULT_PREFIX, dh_install_prefix
+      else
+        path
+      end
     end
 
     def install_files_and_build_extensions
@@ -67,7 +78,7 @@ module Gem2Deb
     def install_gemspec
       if metadata.gemspec
         ruby_versions.each do |version|
-          target = File.join(destdir(:root), "/usr/share/rubygems-integration/#{RUBY_CONFIG_VERSION[version]}/specifications/#{metadata.name}-#{metadata.version}.gemspec")
+          target = File.join(destdir(:root), ensure_install_prefix("/usr/share/rubygems-integration/#{RUBY_CONFIG_VERSION[version]}/specifications/#{metadata.name}-#{metadata.version}.gemspec"))
           FileUtils.mkdir_p(File.dirname(target))
           File.open(target, 'w') do |file|
             file.write(metadata.gemspec.to_ruby)
@@ -146,13 +157,16 @@ module Gem2Deb
       when :root
         return dir
       when :bindir
-        return File.join(dir, BIN_DIR)
+        return File.join(dir, ensure_install_prefix(BIN_DIR))
       when :libdir
-        return File.join(dir, RUBY_CODE_DIR)
+        return File.join(dir, ensure_install_prefix(RUBY_CODE_DIR))
       when :archdir
-        return File.join(dir, `#{SUPPORTED_RUBY_VERSIONS[rubyver]} -rrbconfig -e "puts RbConfig::CONFIG['vendorarchdir']"`.chomp)
+        return File.join(dir, ensure_install_prefix(`#{SUPPORTED_RUBY_VERSIONS[rubyver]} -rrbconfig -e "puts RbConfig::CONFIG['vendorarchdir']"`.chomp))
       when :prefix
-        return File.join(dir, "usr/")
+        prefix = dh_install_prefix
+        prefix[0] = ''
+        prefix += "/"
+        return File.join(dir, prefix)
       end
     end
 
@@ -253,7 +267,8 @@ module Gem2Deb
     end
 
     def installed_ruby_files
-      Dir["debian/#{binary_package}/usr/lib/ruby/vendor_ruby/**/*.rb"]
+      path = ensure_install_prefix("/usr/lib/ruby/vendor_ruby/**/*.rb")
+      Dir["debian/#{binary_package}#{path}"]
     end
 
     def install_changelog
