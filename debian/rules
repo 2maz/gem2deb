@@ -1,5 +1,8 @@
 #!/usr/bin/make -f
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
+export DH_RUBY_IGNORE_TESTS=all
+export DEB_BUILD_OPTIONS=nocheck
+
 %:
 	dh $@
 
