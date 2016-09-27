@@ -61,8 +61,15 @@ module Gem2Deb
         ENV['make'] ||= 'make'
         ENV['make'] += " V=1"
 
-        target = File.expand_path(File.join(destdir, RbConfig::CONFIG['vendorarchdir']))
-        FileUtils.mkdir_p(target)
+        config_dir = RbConfig::CONFIG['vendorarchdir']
+        dh_install_prefix = ENV['DH_RUBY_INSTALL_PREFIX'] || DEFAULT_PREFIX
+        if config_dir.start_with?(DEFAULT_PREFIX)
+          config_dir.sub! DEFAULT_PREFIX, dh_install_prefix
+        end
+
+        target = File.expand_path(File.join(destdir,config_dir))
+        FileUtils.mkdir_p(File.dirname(target))
+
         Dir.chdir(directory) do
           verbose = Gem.configuration.verbose
           # will make Rubygems builder send the output to the terminal in

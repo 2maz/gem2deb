@@ -33,6 +33,8 @@ module Gem2Deb
 
   RUBY_SHEBANG_CALL = '/usr/bin/ruby'
 
+  DEFAULT_PREFIX = '/usr'
+
   BIN_DIR = '/usr/bin'
 
   RUBY_CODE_DIR = '/usr/lib/ruby/vendor_ruby'
