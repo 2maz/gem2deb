@@ -63,7 +63,7 @@ module Gem2Deb
         end
 
         target = File.expand_path(File.join(destdir,config_dir))
-        FileUtils.mkdir_p(File.dirname(target))
+        FileUtils.mkdir_p target
         Dir.chdir(directory) do
           rubygems_builder.build(extension, '.', target, results)
           puts results
